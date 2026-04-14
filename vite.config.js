@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  base: '/freelance-app/',
+  base: '/',
   build: {
     outDir: 'dist',
   },
