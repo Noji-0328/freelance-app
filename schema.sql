@@ -23,7 +23,7 @@ create table if not exists tasks (
   client_id uuid references clients(id) on delete set null,
   price integer default 0,
   due date,
-  status text check (status in ('todo','wip','done')) default 'todo',
+  status text check (status in ('todo','wip','done','waiting','archived')) default 'todo',
   created_at timestamptz default now()
 );
 

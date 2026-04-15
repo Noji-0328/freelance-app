@@ -2,6 +2,48 @@ import { supabase } from './supabase.js'
 import { generatePDF } from './invoice.js'
 import './style.css'
 
+// ===== 認証（パスワード保護） =====
+const PW_HASH = '08fa299aecc0c034e037033e3b0bbfaef26b78c742f16cf88ac3194502d6c394'
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function initAuth() {
+  const lockScreen = document.getElementById('lock-screen')
+  const app = document.getElementById('app')
+  const input = document.getElementById('lock-input')
+  const btn = document.getElementById('lock-btn')
+  const errMsg = document.getElementById('lock-error')
+
+  // セッション中はスキップ
+  if (sessionStorage.getItem('fl_auth') === '1') {
+    lockScreen.style.display = 'none'
+    app.classList.remove('hidden')
+    return
+  }
+
+  const tryLogin = async () => {
+    const hash = await sha256(input.value)
+    if (hash === PW_HASH) {
+      sessionStorage.setItem('fl_auth', '1')
+      lockScreen.style.display = 'none'
+      app.classList.remove('hidden')
+      init()
+    } else {
+      errMsg.classList.remove('hidden')
+      input.value = ''
+      input.classList.add('shake')
+      setTimeout(() => input.classList.remove('shake'), 500)
+    }
+  }
+
+  btn.addEventListener('click', tryLogin)
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin() })
+  input.focus()
+}
+
 // ===== State =====
 let clients = []
 let tasks = []
@@ -75,7 +117,7 @@ function initNav() {
 // ===== Alert Banner =====
 function checkAlerts() {
   const banner = document.getElementById('alert-banner')
-  const unfinished = tasks.filter(t => t.status !== 'done' && t.due)
+  const unfinished = tasks.filter(t => t.status !== 'done' && t.status !== 'waiting' && t.status !== 'archived' && t.due)
   const urgent = unfinished.filter(t => {
     const d = daysDiff(t.due)
     return d !== null && d <= 3
@@ -141,7 +183,7 @@ function initPushNotify() {
 function checkAndSendNotifications() {
   if (Notification.permission !== 'granted') return
   const urgent = tasks.filter(t => {
-    if (t.status === 'done' || !t.due) return false
+    if (t.status === 'done' || t.status === 'waiting' || t.status === 'archived' || !t.due) return false
     const d = daysDiff(t.due)
     return d !== null && d <= 3
   })
@@ -178,7 +220,7 @@ async function fetchMyInfo() {
 
 // ===== Render Kanban =====
 function renderKanban() {
-  const cols = { todo: [], wip: [], done: [] }
+  const cols = { todo: [], wip: [], done: [], waiting: [], archived: [] }
   tasks.forEach(t => { if (cols[t.status]) cols[t.status].push(t) })
 
   Object.entries(cols).forEach(([status, list]) => {
@@ -194,7 +236,7 @@ function renderKanban() {
     el.innerHTML = list.map(t => {
       const d = daysDiff(t.due)
       let badge = ''
-      if (t.due && status !== 'done') {
+      if (t.due && status !== 'done' && status !== 'waiting' && status !== 'archived') {
         if (d < 0) badge = `<span class="badge badge-danger">期限切れ</span>`
         else if (d <= 3) badge = `<span class="badge badge-warning">あと${d}日</span>`
       }
@@ -692,4 +734,4 @@ async function init() {
   checkAndSendNotifications()
 }
 
-document.addEventListener('DOMContentLoaded', init)
+document.addEventListener('DOMContentLoaded', initAuth)

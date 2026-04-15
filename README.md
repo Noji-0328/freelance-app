@@ -19,7 +19,7 @@
 - **フロントエンド**: Vite + Vanilla JS
 - **バックエンド/DB**: Supabase（無料枠）
 - **PDF生成**: jsPDF + jsPDF-AutoTable
-- **ホスティング**: GitHub Pages
+- **ホスティング**: Vercel / GitHub Pages
 
 ---
 
@@ -75,6 +75,12 @@ npm run dev
 ブラウザで `http://localhost:5173` を開いて動作確認します。
 
 ---
+
+## デプロイ
+
+**Vercel（デプロイ済み）**: https://freelance-app.vercel.app/
+- GitHub リポジトリと連携済み。`main` ブランチへの push で自動デプロイ
+- Vercel ダッシュボード「Settings」→「Environment Variables」で `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` を設定
 
 ## GitHub Pages へのデプロイ
 

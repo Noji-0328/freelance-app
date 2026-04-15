@@ -7,7 +7,22 @@
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <div id="app">
+
+  <!-- パスワード画面 -->
+  <div id="lock-screen">
+    <div class="lock-box">
+      <div class="lock-icon">🔒</div>
+      <h1 class="lock-title">FL Manager</h1>
+      <p class="lock-sub">パスワードを入力してください</p>
+      <div class="lock-form">
+        <input type="password" id="lock-input" placeholder="Password" autocomplete="current-password" />
+        <button id="lock-btn">ログイン</button>
+      </div>
+      <p class="lock-error hidden" id="lock-error">パスワードが違います</p>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
     <!-- ナビゲーション -->
     <nav class="navbar">
       <div class="navbar-brand">
@@ -53,12 +68,26 @@
             </div>
             <div class="card-list" id="col-wip"></div>
           </div>
+          <div class="kanban-column" data-status="waiting">
+            <div class="column-header">
+              <span class="column-title">確認待ち</span>
+              <span class="column-count" id="count-waiting">0</span>
+            </div>
+            <div class="card-list" id="col-waiting"></div>
+          </div>
           <div class="kanban-column" data-status="done">
             <div class="column-header">
               <span class="column-title">完了</span>
               <span class="column-count" id="count-done">0</span>
             </div>
             <div class="card-list" id="col-done"></div>
+          </div>
+          <div class="kanban-column" data-status="archived">
+            <div class="column-header">
+              <span class="column-title">済み</span>
+              <span class="column-count" id="count-archived">0</span>
+            </div>
+            <div class="card-list" id="col-archived"></div>
           </div>
         </div>
       </section>
@@ -202,7 +231,9 @@
           <select id="task-status">
             <option value="todo">未着手</option>
             <option value="wip">進行中</option>
+            <option value="waiting">確認待ち</option>
             <option value="done">完了</option>
+            <option value="archived">済み</option>
           </select>
         </div>
       </div>
